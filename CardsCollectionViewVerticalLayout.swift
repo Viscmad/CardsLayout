@@ -1,5 +1,5 @@
 //
-//  CardsCollectionViewVerticleLayout.swift
+//  CardsCollectionViewVerticalLayout.swift
 //  CardsLayout
 //
 //  Created by Filipp Fediakov on 18.08.17.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-open class CardsCollectionViewVerticleLayout: UICollectionViewLayout, CardsCollectionViewLayout {
+open class CardsCollectionViewVerticalLayout: UICollectionViewLayout, CardsCollectionViewLayout {
     
     // MARK: Layout configuration
     

@@ -13,7 +13,7 @@
 		365EC0BF1FABCC9200583152 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 365EC0BE1FABCC9200583152 /* Assets.xcassets */; };
 		365EC0C21FABCC9200583152 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 365EC0C01FABCC9200583152 /* LaunchScreen.storyboard */; };
 		365EC0CA1FABCD1500583152 /* CardsCollectionViewHorizontalLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365EC0C91FABCD1400583152 /* CardsCollectionViewHorizontalLayout.swift */; };
-		36B5506A1FCE28EB005BBDD5 /* CardsCollectionViewVerticleLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B550691FCE28EB005BBDD5 /* CardsCollectionViewVerticleLayout.swift */; };
+		36B5506A1FCE28EB005BBDD5 /* CardsCollectionViewVerticalLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B550691FCE28EB005BBDD5 /* CardsCollectionViewVerticalLayout.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,7 +25,7 @@
 		365EC0C11FABCC9200583152 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		365EC0C31FABCC9200583152 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		365EC0C91FABCD1400583152 /* CardsCollectionViewHorizontalLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CardsCollectionViewHorizontalLayout.swift; path = ../../CardsCollectionViewHorizontalLayout.swift; sourceTree = "<group>"; };
-		36B550691FCE28EB005BBDD5 /* CardsCollectionViewVerticleLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CardsCollectionViewVerticleLayout.swift; path = ../../CardsCollectionViewVerticleLayout.swift; sourceTree = "<group>"; };
+		36B550691FCE28EB005BBDD5 /* CardsCollectionViewVerticalLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CardsCollectionViewVerticalLayout.swift; path = ../../CardsCollectionViewVerticalLayout.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,7 +58,7 @@
 		365EC0B61FABCC9200583152 /* CardsExample */ = {
 			isa = PBXGroup;
 			children = (
-				36B550691FCE28EB005BBDD5 /* CardsCollectionViewVerticleLayout.swift */,
+				36B550691FCE28EB005BBDD5 /* CardsCollectionViewVerticalLayout.swift */,
 				365EC0C91FABCD1400583152 /* CardsCollectionViewHorizontalLayout.swift */,
 				365EC0B71FABCC9200583152 /* AppDelegate.swift */,
 				365EC0B91FABCC9200583152 /* ViewController.swift */,
@@ -144,7 +144,7 @@
 			files = (
 				365EC0BA1FABCC9200583152 /* ViewController.swift in Sources */,
 				365EC0CA1FABCD1500583152 /* CardsCollectionViewHorizontalLayout.swift in Sources */,
-				36B5506A1FCE28EB005BBDD5 /* CardsCollectionViewVerticleLayout.swift in Sources */,
+				36B5506A1FCE28EB005BBDD5 /* CardsCollectionViewVerticalLayout.swift in Sources */,
 				365EC0B81FABCC9200583152 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

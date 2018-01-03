@@ -88,7 +88,7 @@ Pod::Spec.new do |s|
   #  Not including the public_header_files will make all headers public.
   #
 
-  s.source_files  = "CardsCollectionViewLayout.swift"
+  s.source_files  = "CardsCollectionViewHorizontalLayout.swift", "CardsCollectionViewVerticalLayout.swift"
   s.exclude_files = "CardsExample", "CardsOldSource"
 
   # s.public_header_files = "Classes/**/*.h"
