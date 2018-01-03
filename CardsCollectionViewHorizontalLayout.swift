@@ -2,15 +2,23 @@
 //  CardsCollectionViewHorizontalLayout.swift
 //  CardsLayout
 //
-//  Created by Filipp Fediakov on 18.08.17.
-//  Copyright © 2017 filletofish. All rights reserved.
+//  Created by Filipp Fediakov on 03.01.18.
+//  Copyright © 2018 filletofish. All rights reserved.
 //
 
 import UIKit
 
-open class CardsCollectionViewHorizontalLayout: UICollectionViewLayout {
 
-    // MARK: - Layout configuration
+protocol CardsCollectionViewLayout {
+    var itemSize: CGSize { get set }
+    var spacing: CGPoint { get set }
+    var maximumVisibleItems: Int { get set }
+}
+
+
+open class CardsCollectionViewHorizontalLayout: UICollectionViewLayout, CardsCollectionViewLayout {
+
+    // MARK: Layout configuration
 
     public var itemSize: CGSize = CGSize(width: 200, height: 300) {
         didSet {
@@ -18,7 +26,7 @@ open class CardsCollectionViewHorizontalLayout: UICollectionViewLayout {
         }
     }
 
-    public var spacing: CGFloat = 10.0 {
+    public var spacing: CGPoint = CGPoint(x: 10.0, y: 10.0) {
         didSet {
             invalidateLayout()
         }
@@ -30,7 +38,7 @@ open class CardsCollectionViewHorizontalLayout: UICollectionViewLayout {
         }
     }
 
-    // MARK: UICollectionViewLayout
+    // MARK: - UICollectionViewLayout
 
     override open var collectionView: UICollectionView {
         return super.collectionView!
@@ -49,40 +57,56 @@ open class CardsCollectionViewHorizontalLayout: UICollectionViewLayout {
 
     override open func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         let totalItemsCount = collectionView.numberOfItems(inSection: 0)
-
         let minVisibleIndex = max(Int(collectionView.contentOffset.x) / Int(collectionView.bounds.width), 0)
         let maxVisibleIndex = min(minVisibleIndex + maximumVisibleItems, totalItemsCount)
-
-        let contentCenterX = collectionView.contentOffset.x + (collectionView.bounds.width / 2.0)
-
-        let deltaOffset = Int(collectionView.contentOffset.x) % Int(collectionView.bounds.width)
-
-        let percentageDeltaOffset = CGFloat(deltaOffset) / collectionView.bounds.width
-
         let visibleIndices = minVisibleIndex..<maxVisibleIndex
-
-        let attributes: [UICollectionViewLayoutAttributes] = visibleIndices.map { index in
+        let attributes: [UICollectionViewLayoutAttributes?] = visibleIndices.map { index in
             let indexPath = IndexPath(item: index, section: 0)
-            return computeLayoutAttributesForItem(indexPath: indexPath,
-                                                  minVisibleIndex: minVisibleIndex,
-                                                  contentCenterX: contentCenterX,
-                                                  deltaOffset: CGFloat(deltaOffset),
-                                                  percentageDeltaOffset: percentageDeltaOffset)
+            return self.layoutAttributesForItem(at: indexPath)
         }
-
-        return attributes
+        let filteredAttributes = attributes.flatMap { $0 }
+        return filteredAttributes
     }
 
     override open func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        let contentCenterX = collectionView.contentOffset.x + (collectionView.bounds.width / 2.0)
         let minVisibleIndex = Int(collectionView.contentOffset.x) / Int(collectionView.bounds.width)
-        let deltaOffset = Int(collectionView.contentOffset.x) % Int(collectionView.bounds.width)
+        let deltaOffset = CGFloat(Int(collectionView.contentOffset.x) % Int(collectionView.bounds.width))
         let percentageDeltaOffset = CGFloat(deltaOffset) / collectionView.bounds.width
-        return computeLayoutAttributesForItem(indexPath: indexPath,
-                                              minVisibleIndex: minVisibleIndex,
-                                              contentCenterX: contentCenterX,
-                                              deltaOffset: CGFloat(deltaOffset),
-                                              percentageDeltaOffset: percentageDeltaOffset)
+        let visibleIndex = indexPath.row - minVisibleIndex
+
+        let attributes = UICollectionViewLayoutAttributes(forCellWith:indexPath)
+        attributes.size = itemSize
+        let midY = self.collectionView.bounds.midY
+        let midX = self.collectionView.bounds.midX
+        attributes.center = CGPoint(x: midX + spacing.x * CGFloat(visibleIndex),
+                                    y: midY + spacing.y * CGFloat(visibleIndex))
+        attributes.zIndex = maximumVisibleItems - visibleIndex
+        attributes.transform = scaleTransform(forVisibleIndex: visibleIndex,
+                                              percentageOffset: percentageDeltaOffset)
+
+
+        switch visibleIndex {
+        case 0:
+            attributes.center.x -= deltaOffset
+            attributes.isHidden = false
+            break
+        case 1..<maximumVisibleItems:
+            attributes.center.x -= spacing.x * percentageDeltaOffset
+            attributes.center.y -= spacing.y * percentageDeltaOffset
+            if visibleIndex == maximumVisibleItems - 1 {
+                attributes.alpha = percentageDeltaOffset
+            } else {
+                attributes.alpha = 1.0
+            }
+
+            attributes.isHidden = false
+            break
+        default:
+            attributes.alpha = 0
+            attributes.isHidden = true
+            break
+        }
+        return attributes
     }
 
     override open func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
@@ -91,59 +115,26 @@ open class CardsCollectionViewHorizontalLayout: UICollectionViewLayout {
 }
 
 
-// MARK: - Layout computations
-
-fileprivate extension CardsCollectionViewHorizontalLayout {
-
+extension CardsCollectionViewLayout {
     private func scale(at index: Int) -> CGFloat {
         let translatedCoefficient = CGFloat(index) - CGFloat(self.maximumVisibleItems) / 2
         return CGFloat(pow(0.95, translatedCoefficient))
     }
 
-    private func transform(atCurrentVisibleIndex visibleIndex: Int, percentageOffset: CGFloat) -> CGAffineTransform {
-        var rawScale = visibleIndex < maximumVisibleItems ? scale(at: visibleIndex) : 1.0
-
-        if visibleIndex != 0 {
-            let previousScale = scale(at: visibleIndex - 1)
-            let delta = (previousScale - rawScale) * percentageOffset
-            rawScale += delta
+    func scaleTransform(forVisibleIndex visibleIndex: Int, percentageOffset: CGFloat) -> CGAffineTransform {
+        guard visibleIndex != 0 else {
+            let scaleAtZeroIndex = scale(at: visibleIndex)
+            return CGAffineTransform(scaleX: scaleAtZeroIndex, y: scaleAtZeroIndex)
         }
+
+        guard visibleIndex < maximumVisibleItems else {
+            return CGAffineTransform.identity
+        }
+
+        var rawScale = scale(at: visibleIndex)
+        let previousScale = scale(at: visibleIndex - 1)
+        let delta = (previousScale - rawScale) * percentageOffset
+        rawScale += delta
         return CGAffineTransform(scaleX: rawScale, y: rawScale)
     }
-
-    fileprivate func computeLayoutAttributesForItem(indexPath: IndexPath,
-                                                    minVisibleIndex: Int,
-                                                    contentCenterX: CGFloat,
-                                                    deltaOffset: CGFloat,
-                                                    percentageDeltaOffset: CGFloat) -> UICollectionViewLayoutAttributes {
-        let attributes = UICollectionViewLayoutAttributes(forCellWith:indexPath)
-        let visibleIndex = indexPath.row - minVisibleIndex
-        attributes.size = itemSize
-        let midY = self.collectionView.bounds.midY
-        attributes.center = CGPoint(x: contentCenterX + spacing * CGFloat(visibleIndex),
-                                    y: midY + spacing * CGFloat(visibleIndex))
-        attributes.zIndex = maximumVisibleItems - visibleIndex
-
-        attributes.transform = transform(atCurrentVisibleIndex: visibleIndex,
-                                         percentageOffset: percentageDeltaOffset)
-        switch visibleIndex {
-        case 0:
-            attributes.center.x -= deltaOffset
-            break
-        case 1..<maximumVisibleItems:
-            attributes.center.x -= spacing * percentageDeltaOffset
-            attributes.center.y -= spacing * percentageDeltaOffset
-
-
-            if visibleIndex == maximumVisibleItems - 1 {
-                attributes.alpha = percentageDeltaOffset
-            }
-            break
-        default:
-            attributes.alpha = 0
-            break
-        }
-        return attributes
-    }
 }
-
