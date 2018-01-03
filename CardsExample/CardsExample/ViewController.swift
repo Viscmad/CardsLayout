@@ -19,6 +19,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     collectionView.delegate = self
     collectionView.isPagingEnabled = true
     collectionView.showsHorizontalScrollIndicator = false
+    collectionView.showsVerticalScrollIndicator = false
   }
 
   var colors: [UIColor]  = [

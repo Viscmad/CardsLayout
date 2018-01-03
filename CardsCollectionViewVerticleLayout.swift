@@ -4,25 +4,19 @@ open class VerticalCollectionViewLayout: UICollectionViewLayout {
     
     // MARK: - Layout configuration
     
-    //MARK: Size attribute
-    //Using code :
-    //    attributes.size = CGSize(
-    //    width: (collectionView.bounds.width - ((collectionView.bounds.width * 2)/100)) ,
-    //    height: (collectionView.bounds.height - ((collectionView.bounds.height * 4)/100)))
-    //Instead Calling
-    //    public var itemSize: CGSize = CGSize(width: 200, height: 300) {
-    //        didSet{
-    //            invalidateLayout()
-    //        }
-    //    }
+    public var itemSize: CGSize = CGSize(width: 200, height: 300) {
+      didSet{
+        invalidateLayout()
+      }
+    }
     
-    public var spacing: CGFloat = 0.0 {
+    public var spacing: CGPoint = CGPoint(x: 10.0, y: 20.0) {
         didSet{
             invalidateLayout()
         }
     }
     
-    public var maximumVisibleItems: Int = 2 {
+    public var maximumVisibleItems: Int = 4 {
         didSet{
             invalidateLayout()
         }
@@ -36,11 +30,6 @@ open class VerticalCollectionViewLayout: UICollectionViewLayout {
     
     override open var collectionViewContentSize: CGSize {
         let itemsCount = CGFloat(collectionView.numberOfItems(inSection: 0))
-        
-        //Converted from
-        //CGSize(width: collectionView.bounds.width,
-        //height: collectionView.bounds.height * itemsCount)
-        //to
         return CGSize(width: collectionView.bounds.width,
                       height: collectionView.bounds.height * itemsCount)
     }
@@ -52,19 +41,13 @@ open class VerticalCollectionViewLayout: UICollectionViewLayout {
     
     override open func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         let totalItemsCount = collectionView.numberOfItems(inSection: 0)
-        
-        //Converted from contentOffset.x to contentOffset.y
-        //and from collectionView.bounds.widt to collectionView.bounds.heigh
+
         let minVisibleIndex = max(Int(collectionView.contentOffset.y) / Int(collectionView.bounds.height), 0)
         let maxVisibleIndex = min(minVisibleIndex + maximumVisibleItems, totalItemsCount)
         
         let contentCenterX = collectionView.contentOffset.x + (collectionView.bounds.width / 2.0)
-        
-        //Converted from contentOffset.x to contentOffset.y
-        //and from collectionView.bounds.widt to collectionView.bounds.heigh
-        let deltaOffset = Int(collectionView.contentOffset.y) % Int( collectionView.bounds.height)
+        let deltaOffset = Int(collectionView.contentOffset.y) % Int(collectionView.bounds.height)
         let percentageDeltaOffset = CGFloat(deltaOffset) / collectionView.bounds.height
-        
         let visibleIndices = minVisibleIndex..<maxVisibleIndex
         
         let attributes: [UICollectionViewLayoutAttributes] = visibleIndices.map { index in
@@ -82,12 +65,8 @@ open class VerticalCollectionViewLayout: UICollectionViewLayout {
     override open func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         let contentCenterX = collectionView.contentOffset.x + (collectionView.bounds.width / 2.0)
         let minVisibleIndex = Int(collectionView.contentOffset.x) / Int(collectionView.bounds.width)
-        
-        //Converted from contentOffset.x to contentOffset.y
-        //and from collectionView.bounds.widt to collectionView.bounds.heigh
         let deltaOffset = Int(collectionView.contentOffset.y) % Int(collectionView.bounds.height)
         let percentageDeltaOffset = CGFloat(deltaOffset) / collectionView.bounds.height
-        
         return computeLayoutAttributesForItem(indexPath: indexPath,
                                               minVisibleIndex: minVisibleIndex,
                                               contentCenterX: contentCenterX,
@@ -128,25 +107,23 @@ fileprivate extension VerticalCollectionViewLayout {
         let attributes = UICollectionViewLayoutAttributes(forCellWith:indexPath)
         let visibleIndex = indexPath.row - minVisibleIndex
        
-        //Using this to fill up screen with card with fixed % of margin
-        attributes.size = CGSize(
-            width: (collectionView.bounds.width - ((collectionView.bounds.width * 8)/100)) ,
-            height: (collectionView.bounds.height - ((collectionView.bounds.height * 8)/100)))
+        attributes.size = self.itemSize
         
         let midY = self.collectionView.bounds.midY
-        attributes.center = CGPoint(x: contentCenterX + spacing * CGFloat(visibleIndex),
-                                    y: midY + spacing * CGFloat(visibleIndex))
+        let midX = self.collectionView.bounds.midX
+        attributes.center = CGPoint(x: midX + spacing.x * CGFloat(visibleIndex),
+                                    y: midY + spacing.y * CGFloat(visibleIndex))
         attributes.zIndex = maximumVisibleItems - visibleIndex
         
-//        attributes.transform = transform(atCurrentVisibleIndex: visibleIndex,
-//                                         percentageOffset: percentageDeltaOffset)
+        attributes.transform = transform(atCurrentVisibleIndex: visibleIndex,
+                                         percentageOffset: percentageDeltaOffset)
         switch visibleIndex {
         case 0:
             attributes.center.y -= deltaOffset
             break
         case 1..<maximumVisibleItems:
-            attributes.center.x -= spacing * percentageDeltaOffset
-            attributes.center.y -= spacing * percentageDeltaOffset
+            attributes.center.x -= spacing.x * percentageDeltaOffset
+            attributes.center.y -= spacing.y * percentageDeltaOffset
             
             if visibleIndex == maximumVisibleItems - 1 {
                 attributes.alpha = percentageDeltaOffset
